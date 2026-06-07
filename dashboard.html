@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YardSense – Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-page">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>🌿</span> YardSense
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
+      <a href="jobs.html" class="nav-item">🗂 Jobs</a>
+      <a href="inventory.html" class="nav-item">📦 Inventory</a>
+      <a href="inspections.html" class="nav-item">🔍 Inspections</a>
+      <a href="reports.html" class="nav-item">📈 Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="user-name">Loading...</span>
+      <button id="logout-btn" class="btn btn-outline btn-sm">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <h2>Dashboard</h2>
+      <span id="user-role-badge" class="badge"></span>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🗂</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-jobs">—</span>
+          <span class="stat-label">Active Jobs</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-rolls">—</span>
+          <span class="stat-label">Fabric Rolls</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔍</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-inspections">—</span>
+          <span class="stat-label">Inspections Today</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-defects">—</span>
+          <span class="stat-label">Open Defects</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>Recent Jobs</h3>
+      <table class="data-table" id="recent-jobs-table">
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Category</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="recent-jobs-body">
+          <tr><td colspan="5" class="text-center muted">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
