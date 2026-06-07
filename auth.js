@@ -1,13 +1,23 @@
 (async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  const onLoginPage = location.pathname.endsWith('index.html') || location.pathname === '/';
+  // Wait for session to be fully restored (fixes race condition on reload)
+  let { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    session = await new Promise(resolve => {
+      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, s) => {
+        subscription.unsubscribe();
+        resolve(s);
+      });
+    });
+  }
+
+  const onLoginPage = location.pathname === '/' || location.pathname === '/index.html';
 
   if (session && onLoginPage) {
-    location.href = 'dashboard.html';
+    location.href = '/dashboard';
     return;
   }
   if (!session && !onLoginPage) {
-    location.href = 'index.html';
+    location.href = '/';
     return;
   }
 
@@ -20,7 +30,7 @@
 
     const nameEl = document.getElementById('user-name');
     const badgeEl = document.getElementById('user-role-badge');
-    if (nameEl && profile) nameEl.textContent = profile.full_name || session.user.email;
+    if (nameEl) nameEl.textContent = profile?.full_name || session.user.email;
     if (badgeEl && profile) {
       badgeEl.textContent = profile.role;
       badgeEl.classList.add('badge-' + profile.role);
@@ -47,7 +57,7 @@
         btn.textContent = 'Sign In';
         btn.disabled = false;
       } else {
-        location.href = 'dashboard.html';
+        location.href = '/dashboard';
       }
     });
   }
@@ -56,7 +66,7 @@
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
       await sb.auth.signOut();
-      location.href = 'index.html';
+      location.href = '/';
     });
   }
 
@@ -73,7 +83,7 @@
         return;
       }
       const { error } = await sb.auth.resetPasswordForEmail(email, {
-        redirectTo: location.origin + '/index.html'
+        redirectTo: location.origin + '/'
       });
       if (error) {
         errEl.textContent = error.message;
