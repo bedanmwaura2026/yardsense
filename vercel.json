@@ -2,7 +2,11 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/", "destination": "/index.html" }
+    { "source": "/jobs", "destination": "/jobs.html" },
+    { "source": "/inventory", "destination": "/inventory.html" },
+    { "source": "/inspections", "destination": "/inspections.html" },
+    { "source": "/reports", "destination": "/reports.html" }
   ]
 }
