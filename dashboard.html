@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YardSense â Dashboard</title>
+  <title>YardSense – Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="app-page">
 
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <span>ð¿</span> YardSense
+      🌿 YardSense
     </div>
     <nav class="sidebar-nav">
-      <a href="/dashboard" class="nav-item active">ð Dashboard</a>
-      <a href="/jobs" class="nav-item">ð Jobs</a>
-      <a href="/inventory" class="nav-item">ð¦ Inventory</a>
-      <a href="/inspections" class="nav-item">ð Inspections</a>
-      <a href="/reports" class="nav-item">ð Reports</a>
+      <a href="/dashboard" class="nav-item active">📊 Dashboard</a>
+      <a href="/jobs" class="nav-item">🗂 Jobs</a>
+      <a href="/inventory" class="nav-item">📦 Inventory</a>
+      <a href="/inspections" class="nav-item">🔍 Inspections</a>
+      <a href="/reports" class="nav-item">📈 Reports</a>
     </nav>
     <div class="sidebar-footer">
       <span id="user-name">Loading...</span>
@@ -28,37 +28,29 @@
   <main class="main-content">
     <header class="page-header">
       <h2>Dashboard</h2>
-      <span id="user-role-badge" class="badge"></span>
+      <span id="user-role-badge" class="role-badge"></span>
     </header>
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">ð</div>
-        <div class="stat-info">
-          <span class="stat-value" id="stat-jobs">â</span>
-          <span class="stat-label">Active Jobs</span>
-        </div>
+        <span class="stat-icon">🚚</span>
+        <span class="stat-number" id="stat-jobs">—</span>
+        <span class="stat-label">Active Jobs</span>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">ð¦</div>
-        <div class="stat-info">
-          <span class="stat-value" id="stat-rolls">â</span>
-          <span class="stat-label">Fabric Rolls</span>
-        </div>
+        <span class="stat-icon">📦</span>
+        <span class="stat-number" id="stat-rolls">—</span>
+        <span class="stat-label">Fabric Rolls</span>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">ð</div>
-        <div class="stat-info">
-          <span class="stat-value" id="stat-inspections">â</span>
-          <span class="stat-label">Inspections Today</span>
-        </div>
+        <span class="stat-icon">🔍</span>
+        <span class="stat-number" id="stat-inspections">—</span>
+        <span class="stat-label">Inspections Today</span>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">â ï¸</div>
-        <div class="stat-info">
-          <span class="stat-value" id="stat-defects">â</span>
-          <span class="stat-label">Open Defects</span>
-        </div>
+        <span class="stat-icon">⚠️</span>
+        <span class="stat-number" id="stat-defects">—</span>
+        <span class="stat-label">Open Defects</span>
       </div>
     </div>
 
