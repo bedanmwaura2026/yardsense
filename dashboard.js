@@ -1,5 +1,14 @@
 (async () => {
-  const { data: { session } } = await sb.auth.getSession();
+  // Wait for session to be fully restored (fixes loading stuck on reload)
+  let { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    session = await new Promise(resolve => {
+      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, s) => {
+        subscription.unsubscribe();
+        resolve(s);
+      });
+    });
+  }
   if (!session) return;
 
   const [jobsRes, rollsRes, inspRes, defectsRes] = await Promise.all([
