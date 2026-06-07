@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YardSense – Inventory</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-page">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      🌿 YardSense
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard" class="nav-item">📊 Dashboard</a>
+      <a href="/jobs" class="nav-item">🗂 Jobs</a>
+      <a href="/inventory" class="nav-item active">📦 Inventory</a>
+      <a href="/inspections" class="nav-item">🔍 Inspections</a>
+      <a href="/reports" class="nav-item">📈 Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="user-name">Loading...</span>
+      <button id="logout-btn" class="btn btn-outline btn-sm">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <h2>Inventory</h2>
+      <span id="user-role-badge" class="role-badge"></span>
+    </header>
+
+    <div class="section-card">
+      <h3>Inventory</h3>
+      <p class="muted">Inventory management coming soon.</p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
