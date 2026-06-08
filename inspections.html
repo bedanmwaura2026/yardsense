@@ -5,6 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YardSense – Inspections</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .insp-stats { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+    .insp-stat-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px 24px; flex:1; min-width:140px; }
+    .insp-stat-card .label { font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+    .insp-stat-card .value { font-size:28px; font-weight:700; color:#1e293b; margin-top:4px; }
+    .insp-stat-card .value.pass { color:#16a34a; }
+    .insp-stat-card .value.fail { color:#dc2626; }
+    .insp-toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+    .insp-toolbar input, .insp-toolbar select { padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; }
+    .insp-toolbar input { flex:1; min-width:200px; }
+    .btn-primary { background:#3b82f6; color:#fff; border:none; padding:9px 18px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+    .btn-primary:hover { background:#2563eb; }
+    .btn-sm { padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:none; }
+    .btn-edit { background:#f1f5f9; color:#334155; }
+    .btn-edit:hover { background:#e2e8f0; }
+    .btn-del { background:#fee2e2; color:#dc2626; }
+    .btn-del:hover { background:#fecaca; }
+    .insp-table-wrap { overflow-x:auto; }
+    .insp-table { width:100%; border-collapse:collapse; font-size:13px; min-width:900px; }
+    .insp-table th { background:#f8fafc; color:#475569; font-weight:600; text-align:left; padding:10px 12px; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+    .insp-table td { padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#1e293b; white-space:nowrap; }
+    .insp-table tr:hover td { background:#f8fafc; }
+    .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .badge-pass { background:#dcfce7; color:#16a34a; }
+    .badge-fail { background:#fee2e2; color:#dc2626; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:14px; padding:28px; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .modal h3 { margin:0 0 20px; font-size:18px; color:#1e293b; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-group { display:flex; flex-direction:column; gap:4px; }
+    .form-group.full { grid-column:1/-1; }
+    .form-group label { font-size:12px; font-weight:600; color:#475569; }
+    .form-group input, .form-group select { padding:8px 10px; border:1px solid #cbd5e1; border-radius:7px; font-size:13px; }
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+    .btn-cancel { background:#f1f5f9; color:#334155; border:none; padding:9px 18px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+    .empty-state { text-align:center; padding:40px; color:#94a3b8; font-size:14px; }
+    #insp-loading { text-align:center; padding:30px; color:#64748b; }
+  </style>
 </head>
 <body class="app-page">
 
@@ -13,32 +52,138 @@
       <img src="logo.png" alt="YardSense" class="sidebar-logo-img"> YardSense
     </div>
     <nav class="sidebar-nav">
-      <a href="/dashboard" class="nav-item">📊 Dashboard</a>
-      <a href="/jobs" class="nav-item">🗂 Jobs</a>
-      <a href="/inventory" class="nav-item">📦 Inventory</a>
-      <a href="/inspections" class="nav-item active">🔍 Inspections</a>
-      <a href="/reports" class="nav-item">📈 Reports</a>
+      <a href="/dashboard" class="nav-item">📄 Dashboard</a>
+      <a href="/jobs" class="nav-item">📦 Jobs</a>
+      <a href="/inventory" class="nav-item">🧵 Inventory</a>
+      <a href="/inspections" class="nav-item active">🔵 Inspections</a>
+      <a href="/reports" class="nav-item">📋 Reports</a>
     </nav>
     <div class="sidebar-footer">
-      <span id="user-name">Loading...</span>
-      <button id="logout-btn" class="btn btn-outline btn-sm">Sign Out</button>
+      <span id="sidebar-user-name"></span>
+      <button id="signout-btn" class="btn-signout">Sign Out</button>
     </div>
   </aside>
 
   <main class="main-content">
     <header class="page-header">
-      <h2>Inspections</h2>
-      <span id="user-role-badge" class="role-badge"></span>
+      <h2>Inspections <span id="user-role-badge" class="role-badge"></span></h2>
+      <button class="btn-primary" id="add-insp-btn">+ Add Inspection</button>
     </header>
 
+    <!-- Stats -->
+    <div class="insp-stats">
+      <div class="insp-stat-card"><div class="label">Total Rolls</div><div class="value" id="stat-total">-</div></div>
+      <div class="insp-stat-card"><div class="label">Total Kgs</div><div class="value" id="stat-kgs">-</div></div>
+      <div class="insp-stat-card"><div class="label">Total Mtrs</div><div class="value" id="stat-mtrs">-</div></div>
+      <div class="insp-stat-card"><div class="label">Passed</div><div class="value pass" id="stat-pass">-</div></div>
+      <div class="insp-stat-card"><div class="label">Failed</div><div class="value fail" id="stat-fail">-</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="insp-toolbar">
+      <input type="text" id="insp-search" placeholder="Search barcode, supplier, defect..." />
+      <select id="insp-filter-pf">
+        <option value="">All Results</option>
+        <option value="pass">Pass</option>
+        <option value="fail">Fail</option>
+      </select>
+    </div>
+
+    <!-- Table -->
     <div class="section-card">
-      <h3>Inspections</h3>
-      <p class="muted">Inspections management coming soon.</p>
+      <div id="insp-loading">Loading inspections...</div>
+      <div class="insp-table-wrap" id="insp-table-wrap" style="display:none">
+        <table class="insp-table">
+          <thead>
+            <tr>
+              <th>Fabric Barcode</th>
+              <th>Supplier Name</th>
+              <th>Supplier Fabric Code</th>
+              <th>Roll No#</th>
+              <th>Kgs</th>
+              <th>Mtrs</th>
+              <th>Defect Type</th>
+              <th>Date Received</th>
+              <th>Date Inspected</th>
+              <th>Penalty Points</th>
+              <th>Pass/Fail</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="insp-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="insp-empty" style="display:none">No inspection records found.</div>
+      </div>
     </div>
   </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="insp-modal">
+    <div class="modal">
+      <h3 id="modal-title">Add Inspection</h3>
+      <form id="insp-form">
+        <input type="hidden" id="edit-id" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Fabric Barcode *</label>
+            <input type="text" id="f-barcode" required placeholder="e.g. 300123" />
+          </div>
+          <div class="form-group">
+            <label>Supplier Name *</label>
+            <input type="text" id="f-supplier" required placeholder="e.g. Runfeng" />
+          </div>
+          <div class="form-group">
+            <label>Supplier Fabric Code</label>
+            <input type="text" id="f-fabric-code" placeholder="e.g. 8224" />
+          </div>
+          <div class="form-group">
+            <label>Roll No#</label>
+            <input type="text" id="f-roll-no" placeholder="e.g. 2" />
+          </div>
+          <div class="form-group">
+            <label>Kgs</label>
+            <input type="number" step="0.01" id="f-kgs" placeholder="e.g. 35" />
+          </div>
+          <div class="form-group">
+            <label>Mtrs</label>
+            <input type="number" step="0.01" id="f-mtrs" placeholder="e.g. 120" />
+          </div>
+          <div class="form-group full">
+            <label>Defect Type</label>
+            <input type="text" id="f-defect" placeholder="e.g. Loose Yarns" />
+          </div>
+          <div class="form-group">
+            <label>Date Received</label>
+            <input type="date" id="f-date-recv" />
+          </div>
+          <div class="form-group">
+            <label>Date Inspected</label>
+            <input type="date" id="f-date-insp" />
+          </div>
+          <div class="form-group">
+            <label>Penalty Points</label>
+            <input type="number" id="f-penalty" placeholder="e.g. 45" />
+          </div>
+          <div class="form-group">
+            <label>Pass / Fail *</label>
+            <select id="f-pf" required>
+              <option value="">Select...</option>
+              <option value="pass">Pass</option>
+              <option value="fail">Fail</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-primary" id="modal-save-btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
   <script src="auth.js"></script>
+  <script src="inspections.js"></script>
 </body>
 </html>
