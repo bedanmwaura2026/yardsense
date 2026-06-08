@@ -1,6 +1,6 @@
 // inspections.js — Fabric Inspection Module for YardSense
 // Reads from / writes to Supabase "inspections" table
-// Requires: supabase.js (exposes `sb`), auth.js
+// Requires: supabase.js (exposes global `sb`), auth.js
 
 (function () {
   'use strict';
@@ -46,6 +46,7 @@
     loading.style.display = 'block';
     tableWrap.style.display = 'none';
 
+    /* global sb */
     const { data, error } = await sb
       .from('inspections')
       .select('id,fabric_barcode,supplier_name,supplier_fabric_code,roll_no,kgs,mtrs,defect_type,date_received,date_inspected,penalty_points,pass_fail')
@@ -132,8 +133,8 @@
   pfFilter.addEventListener('change', applyFilters);
 
   // ── Modal open / close ────────────────────────────────────────────────────
-  function openModal(title = 'Add Inspection') {
-    modalTitle.textContent = title;
+  function openModal(title) {
+    modalTitle.textContent = title || 'Add Inspection';
     modal.classList.add('open');
   }
 
@@ -143,39 +144,40 @@
     fId.value = '';
   }
 
-  addBtn.addEventListener('click', () => openModal('Add Inspection'));
+  addBtn.addEventListener('click', function () { openModal('Add Inspection'); });
   cancelBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   window.editInspection = function (id) {
-    const row = allRows.find(r => String(r.id) === String(id));
+    const row = allRows.find(function (r) { return String(r.id) === String(id); });
     if (!row) return;
     fId.value       = row.id;
-    fBarcode.value  = row.fabric_barcode  || '';
-    fSupplier.value = row.supplier_name   || '';
-    fFabCode.value  = row.supplier_fabric_code || '';
-    fRollNo.value   = row.roll_no         || '';
-    fKgs.value      = row.kgs             != null ? row.kgs  : '';
-    fMtrs.value     = row.mtrs            != null ? row.mtrs : '';
-    fDefect.value   = row.defect_type     || '';
-    fDateRecv.value = row.date_received   || '';
-    fDateInsp.value = row.date_inspected  || '';
-    fPenalty.value  = row.penalty_points  != null ? row.penalty_points : '';
-    fPF.value       = row.pass_fail       || '';
+    fBarcode.value  = row.fabric_barcode        || '';
+    fSupplier.value = row.supplier_name         || '';
+    fFabCode.value  = row.supplier_fabric_code  || '';
+    fRollNo.value   = row.roll_no               || '';
+    fKgs.value      = row.kgs       != null ? row.kgs  : '';
+    fMtrs.value     = row.mtrs      != null ? row.mtrs : '';
+    fDefect.value   = row.defect_type           || '';
+    fDateRecv.value = row.date_received         || '';
+    fDateInsp.value = row.date_inspected        || '';
+    fPenalty.value  = row.penalty_points != null ? row.penalty_points : '';
+    fPF.value       = row.pass_fail             || '';
     openModal('Edit Inspection');
   };
 
   // ── Delete ────────────────────────────────────────────────────────────────
   window.deleteInspection = async function (id) {
     if (!confirm('Delete this inspection record?')) return;
+    /* global sb */
     const { error } = await sb.from('inspections').delete().eq('id', id);
     if (error) { alert('Delete failed: ' + error.message); return; }
     await loadInspections();
   };
 
   // ── Save (insert or update) ───────────────────────────────────────────────
-  form.addEventListener('submit', async e => {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const saveBtn = document.getElementById('modal-save-btn');
     saveBtn.disabled = true;
@@ -186,15 +188,16 @@
       supplier_name:        fSupplier.value.trim() || null,
       supplier_fabric_code: fFabCode.value.trim()  || null,
       roll_no:              fRollNo.value.trim()   || null,
-      kgs:                  fKgs.value      !== '' ? parseFloat(fKgs.value)  : null,
-      mtrs:                 fMtrs.value     !== '' ? parseFloat(fMtrs.value) : null,
+      kgs:     fKgs.value     !== '' ? parseFloat(fKgs.value)     : null,
+      mtrs:    fMtrs.value    !== '' ? parseFloat(fMtrs.value)    : null,
       defect_type:          fDefect.value.trim()   || null,
-      date_received:        fDateRecv.value || null,
-      date_inspected:       fDateInsp.value || null,
-      penalty_points:       fPenalty.value  !== '' ? parseInt(fPenalty.value, 10) : null,
-      pass_fail:            fPF.value       || null,
+      date_received:        fDateRecv.value        || null,
+      date_inspected:       fDateInsp.value        || null,
+      penalty_points: fPenalty.value !== '' ? parseInt(fPenalty.value, 10) : null,
+      pass_fail:            fPF.value              || null,
     };
 
+    /* global sb */
     let error;
     if (fId.value) {
       ({ error } = await sb.from('inspections').update(payload).eq('id', fId.value));
@@ -210,14 +213,17 @@
     await loadInspections();
   });
 
-  // ── Init ──────────────────────────────────────────────────────────────────
-  // Wait for auth to be ready (auth.js sets window.currentUser or fires an event)
+  // ── Init: wait until `sb` global is available ────────────────────────────
   function init() {
-    if (window.sb) {
-      loadInspections();
-    } else {
-      // sb may not be ready yet; retry after short delay
-      setTimeout(init, 200);
+    try {
+      /* global sb */
+      if (typeof sb !== 'undefined' && sb && typeof sb.from === 'function') {
+        loadInspections();
+      } else {
+        setTimeout(init, 150);
+      }
+    } catch (e) {
+      setTimeout(init, 150);
     }
   }
 
@@ -226,4 +232,5 @@
   } else {
     init();
   }
+
 })();
